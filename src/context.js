@@ -1,5 +1,8 @@
 import React, { Component } from 'react'
 import items from "./data"
+import Client from "./Contentful"
+
+
 const RoomContext = React.createContext();
 
 
@@ -19,6 +22,18 @@ const RoomContext = React.createContext();
  breakfast:false,
  pets:false
  };
+
+getData = async () =>{
+ try {
+ let response = await Client.getEntries({
+  content_type: "resort"
+ });
+ } catch (error){
+  console.log(error)
+ }
+}
+
+
 
  componentDidMount(){
   let rooms = this.formatData(items);
@@ -60,7 +75,7 @@ const RoomContext = React.createContext();
 
  handleChange = event =>{
   const target = event.target
-  const value = event.type ==='checkbox' ?target.checked:target.value
+  const value = target.type ==='checkbox' ?target.checked:target.value
   const name = event.target.name;
   this.setState({
    [name] : value
@@ -74,7 +89,8 @@ const RoomContext = React.createContext();
   } = this.state
   
   let tempRooms = [...rooms]
-  capacity = parseInt(capacity)
+  capacity = parseInt(capacity);
+  price = parseInt(price);
 
   if(type !=='all'){
    tempRooms = tempRooms.filter(room => room.type === type)
@@ -83,6 +99,20 @@ const RoomContext = React.createContext();
   if(capacity !== 1){
    tempRooms = tempRooms.filter(room=>room.capacity >= capacity)
   }
+  tempRooms=tempRooms.filter(room=>room.price <= price)
+
+  tempRooms = tempRooms.filter(room =>room.size >= minSize && room.size <= maxSize)
+
+  if(breakfast){
+   tempRooms = tempRooms.filter(room => room.breakfast === true)
+  }
+
+  if(pets){
+   tempRooms = tempRooms.filter(room => room.pets === true)
+  }
+
+
+
 
   this.setState({
    sortedRooms: tempRooms
